@@ -1,7 +1,8 @@
 import logging
 
 from bson.timestamp import Timestamp
-from pymongo import Connection
+from pymongo import Connection, MongoReplicaSetClient
+import pymongo
 from pymongo.collection import Collection
 from pymongo.errors import OperationFailure, PyMongoError
 
@@ -72,7 +73,7 @@ class MongoHandler(logging.Handler):
 
     def __init__(self, level=logging.NOTSET, host='localhost', port=27017, database_name='logs', collection='logs',
                  username=None, password=None, fail_silently=False, formatter=None, capped=False,
-                 capped_max=1000, capped_size=1000000, **options):
+                 capped_max=1000, capped_size=1000000, use_rs_client=False, **options):
         """Setting up mongo handler, initializing mongo database connection via pymongo."""
         logging.Handler.__init__(self, level)
         self.host = host
@@ -91,13 +92,17 @@ class MongoHandler(logging.Handler):
         self.capped_max = capped_max
         self.capped_size = capped_size
         self.options = options
+        self.use_rs_client = use_rs_client
         self._connect()
 
     def _connect(self):
         """Connecting to mongo database."""
 
         try:
-            self.connection = Connection(host=self.host, port=self.port, **self.options)
+            if self.use_rs_client:
+                self.connection = MongoReplicaSetClient(self.host)
+            else:
+                self.connection = Connection(host=self.host, port=self.port, **self.options)
         except PyMongoError:
             if self.fail_silently:
                 return
