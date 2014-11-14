@@ -26,6 +26,16 @@ Example handler python configuration: ::
  logger.warning('test')
 
 
+Using a Replica Set:
+--------------------
+If you are using a MongoDB replica set, create the MongoHandler object like this: ::
+
+  MongoHandler(host='<mongo_uri>', use_rs_client=True)
+
+For infomation about the syntax of <mongo_uri>, visit this page:
+  http://docs.mongodb.org/manual/reference/connection-string/
+
+
 Contextual information
 ----------------------
 
